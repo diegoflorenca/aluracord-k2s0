@@ -37,6 +37,7 @@ export default function PaginaInicial() {
 
   // Criação da variável username com seu Setter, inicializada com o valor 'diegoflorenca'
   const [username, setUsername] = React.useState('diegoflorenca');
+  const [isDisabled, setIsDisabled] = React.useState(false);
   const roteamento = useRouter();
 
   return (
@@ -105,6 +106,13 @@ export default function PaginaInicial() {
                 const valor = event.target.value;
                 // Troca o valor da variável através do React e avise quem precisa saber
                 setUsername(valor);
+
+                // DESAFIO: Impedir o submit do form se o username tiver menos de duas letras
+                // Verifica se o username possui mais do que 2 letras
+                const usernameStatus = valor.length <= 2 ? true : false;
+
+                // Modifica a variável de controle do botão dependendo do tamanho do username
+                setIsDisabled(usernameStatus);
               }}
               fullWidth
               textFieldColors={{
@@ -119,6 +127,7 @@ export default function PaginaInicial() {
             <Button
               type='submit'
               label='Entrar'
+              disabled={isDisabled}
               fullWidth
               buttonColors={{
                 contrastColor: appConfig.theme.colors.neutrals['000'],

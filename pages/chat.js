@@ -125,7 +125,7 @@ export default function ChatPage() {
 				alignItems: 'center',
 				justifyContent: 'center',
 				backgroundColor: appConfig.theme.colors.primary[500],
-				backgroundImage: `url(https://virtualbackgrounds.site/wp-content/uploads/2020/08/the-matrix-digital-rain.jpg)`,
+				backgroundImage: `url(https://www.teahub.io/photos/full/192-1920958_star-wars-rogue-one-k2so..jpg)`,
 				backgroundRepeat: 'no-repeat',
 				backgroundSize: 'cover',
 				backgroundBlendMode: 'multiply',
@@ -215,6 +215,7 @@ export default function ChatPage() {
 						<Button
 							type='submit'
 							label='Enviar'
+							styleSheet={{ color: 'black' }}
 							onClick={(event) => {
 								event.preventDefault();
 								if (mensagem != '') {
@@ -318,8 +319,7 @@ function MessageList(props) {
 									handlerRemoveMensagem(mensagem.id);
 								}}
 								styleSheet={{
-									position: 'absolute',
-									right: '1rem',
+									marginLeft: 'auto',
 									padding: '6px',
 								}}
 								buttonColors={{

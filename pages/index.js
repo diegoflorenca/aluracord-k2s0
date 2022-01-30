@@ -47,8 +47,8 @@ export default function PaginaInicial() {
 					display: 'flex',
 					alignItems: 'center',
 					justifyContent: 'center',
-					backgroundColor: appConfig.theme.colors.primary[500],
-					backgroundImage: 'url(https://virtualbackgrounds.site/wp-content/uploads/2020/08/the-matrix-digital-rain.jpg)',
+					backgroundColor: appConfig.theme.colors.neutrals[400],
+					backgroundImage: 'url(https://www.teahub.io/photos/full/192-1920958_star-wars-rogue-one-k2so..jpg)',
 					backgroundRepeat: 'no-repeat',
 					backgroundSize: 'cover',
 					backgroundBlendMode: 'multiply',
@@ -129,9 +129,10 @@ export default function PaginaInicial() {
 							label='Entrar'
 							disabled={isDisabled}
 							fullWidth
+							styleSheet={{ color: 'black' }}
 							buttonColors={{
 								contrastColor: appConfig.theme.colors.neutrals['000'],
-								mainColor: appConfig.theme.colors.primary[500],
+								mainColor: appConfig.theme.colors.primary[700],
 								mainColorLight: appConfig.theme.colors.primary[400],
 								mainColorStrong: appConfig.theme.colors.primary[600],
 							}}

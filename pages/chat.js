@@ -2,55 +2,106 @@ import { Box, Text, TextField, Image, Button } from '@skynexui/components';
 import React from 'react';
 import appConfig from '../config.json';
 import { createClient } from '@supabase/supabase-js';
+import { useRouter } from 'next/router';
+import { ButtonSendSticker } from '../src/components/ButtonSendSticker';
 
 const SUPABASE_URL = 'https://rmpbcorzusgymvvulncf.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTY0MzQwODUxNiwiZXhwIjoxOTU4OTg0NTE2fQ.OtFYIDdxk1Es5tNx2dJvtSRky5ogKF3kkG1gHDj9GcM';
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-export default function ChatPage() {
-	// É importante sempre inicializar o useState com algum valor, mesmo que o valor seja vazio
-	const [mensagem, setMensagem] = React.useState('');
-	const [listaDeMensagens, setListaDeMensagens] = React.useState([]);
+/*
+ * A função escutaMensagensEmTempoReal recebe uma função como parâmetro 'adicionaMensagem'.
+ * Dessa forma, é possível enviar o resultado do 'listener' do supabase, que é a mensagem
+ * que acabamos de inserir, para a função que vai colocar essa mensagem no setter 'setListaDeMensagens',
+ * que está dentro do 'useEffect'
+ */
+function escutaMensagensEmTempoReal(adicionaMensagem) {
+	return supabaseClient
+		.from('mensagens')
+		.on('INSERT', (respostaLive) => {
+			// console.log('Houve uma nova mensagem', oQueVeio);
+			adicionaMensagem(respostaLive.new);
+		})
+		.subscribe();
+}
 
-	/* Algo que não faz parte do fluxo padrão o useEffect foge da execução padrão do código
-   pode ser executado em um dado momento ou como efeito de alteração de outro elemento.
-   Se o dado demora um pouco para chegar ele não faz parte do fluxo padrão, e pode ser considerado um efeito colateral */
+export default function ChatPage() {
+	// * Router para ter acesso a varivável da URL
+	const roteamento = useRouter();
+	// * Usuário logado
+	const usuarioLogado = roteamento.query.username;
+	// console.log('usuarioLogado: ', usuarioLogado);
+	// * É importante sempre inicializar o useState com algum valor, mesmo que o valor seja vazio
+	const [mensagem, setMensagem] = React.useState('');
+	// const [listaDeMensagens, setListaDeMensagens] = React.useState([]);
+	const [listaDeMensagens, setListaDeMensagens] = React.useState([
+		// {
+		// 	id: 1,
+		// 	de: 'diegoflorenca',
+		// 	texto: ':sticker: https://www.alura.com.br/imersao-react-4/assets/figurinhas/Figurinha_3.png',
+		// },
+		// {
+		// 	id: 2,
+		// 	de: 'omariosouto',
+		// 	texto: 'O ternário é meio triste',
+		// },
+	]);
+
+	/*
+	 * Algo que não faz parte do fluxo padrão o useEffect foge da execução padrão do código pode ser executado em um dado momento ou como efeito de alteração de outro elemento. Se o dado demora um pouco para chegar ele não faz parte do fluxo padrão, e pode ser considerado um efeito colateral
+	 */
+
+	/*
+	! DÙVIDA - O useEffect não deveria ser executado apelas uma vez? Quando a página é carregada.
+	! Então como a funcão escutaMensagensEmTempoReal é executada sempre que uma nova mensagem é enviada?
+	*/
 	React.useEffect(() => {
 		// Request dos dados do supabase
 		supabaseClient
 			.from('mensagens')
 			.select('*')
-			//
+			// * Ordena a query do mais novo para o mais antigo
 			.order('created_at', { ascending: false })
 			.then(({ data }) => {
-				console.log('Consulta de Dados: ', data);
+				// console.log('Consulta de Dados: ', data);
 				setListaDeMensagens(data);
 			});
+		escutaMensagensEmTempoReal((novaMensagem) => {
+			console.log('Nova mensagem', novaMensagem);
+			/*
+			 * Para reutilizar um valor de referência (objeto ou array),
+			 * e obter seu valor atual e não o inicial,
+			 * é preciso passar uma função para o setState, neste caso,
+			 * setListaDeMensagens(função)
+			 */
+			setListaDeMensagens((valorAtualDaLista) => {
+				return [novaMensagem, ...valorAtualDaLista];
+			});
+		});
 	}, []);
 
 	/*
-  // Usuário
-  - Usuário digita no campo textarea
-  - Aperta enter para enviar
-  - Tem que adicionar o texto na listagem
+	* Usuário
+	- Usuário digita no campo textarea
+	- Aperta enter para enviar
+	- Tem que adicionar o texto na listagem
 
-  // Dev
-  - [X] Criar o campo
-  - [X] Vamos usar o onChange e o useState (ter if para caso seja enter para limpar a variável)
-  - [X] Atualizar a lista de mensagens
-  */
+	* Dev
+	- [X] Criar o campo
+	- [X] Vamos usar o onChange e o useState (ter if para caso seja enter para limpar a variável)
+	- [X] Atualizar a lista de mensagens
 
-	/*
-  DESAFIOS
-    - [ ] colorar um loading enquanto as mensagens estão baixando
-    - [ ] Fazer um mouseover na imagem do usuário, passa o mouse e abre o perfil da pessoa usar a API do GITHUB
-    - [ ] Além de mandar mensagens mandar pull, imagem, anexo etc.
-  */
+	* DESAFIOS AULA 4
+	- [ ] colorar um loading enquanto as mensagens estão baixando
+	- [ ] Fazer um mouseover na imagem do usuário, passa o mouse e abre o perfil da pessoa usar a API do GITHUB
+	- [ ] Além de mandar mensagens mandar pull, imagem, anexo etc.
+  	*/
 
 	function handleNovaMensagem(novaMensagem) {
 		const mensagem = {
 			// id: listaDeMensagens.length + 1,
-			de: 'vanessametonini',
+			// de: 'vanessametonini',
+			de: usuarioLogado,
 			texto: novaMensagem,
 		};
 
@@ -59,8 +110,9 @@ export default function ChatPage() {
 			// Precisa ser um objeto com os MESMOS CAMPOS presentes no supabase
 			.insert([mensagem])
 			.then(({ data }) => {
-				console.log('Criando mensagem: ', data);
-				setListaDeMensagens([data[0], ...listaDeMensagens]);
+				// * Aula 05 - Essa função vai parar de atualizar a lista
+				// console.log('Criando mensagem: ', data);
+				// setListaDeMensagens([data[0], ...listaDeMensagens]);
 			});
 
 		setMensagem('');
@@ -127,6 +179,14 @@ export default function ChatPage() {
 							alignItems: 'center',
 						}}
 					>
+						{/* Callback */}
+						<ButtonSendSticker
+							onStickerClick={(sticker) => {
+								// console.log('[USANDO O COMPONENTE] Salva esse sticker no banco', sticker);
+								// console.log(':sticker:' + sticker);
+								//handleNovaMensagem(':sticker: ' + sticker);
+							}}
+						/>
 						<TextField
 							value={mensagem}
 							onChange={(event) => {
@@ -270,7 +330,9 @@ function MessageList(props) {
 								}}
 							/>
 						</Box>
-						{mensagem.texto}
+						{/* Se a mensagem possui stickers: mostra imagem, caso contrário, só mostra o texto */}
+						{mensagem.texto.startsWith(':sticker:') ? <Image src={mensagem.texto.replace(':sticker:', '')} /> : mensagem.texto}
+						{/* Se precisar de mais 'ifs' será necessário um outro método */}
 					</Text>
 				);
 			})}
